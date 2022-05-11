@@ -1,13 +1,15 @@
-import re
-from datacenter.models import Mark, Chastisement, Schoolkid, Lesson, Commendation
-from django.db.models import F
-from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 import random
+
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
+from django.db.models import F
+
+from datacenter.models import (Chastisement, Commendation, Lesson, Mark,
+                               Schoolkid)
 
 COMMENDATIONS_TEXT = [
     'Молодец!',
     'Отлично!',
-    'Гораздо лучше, чем я ожидал!', 
+    'Гораздо лучше, чем я ожидал!',
     'Ты меня приятно удивил! Великолепно!',
     'Прекрасно!',
     'Ты меня очень обрадовал!',
@@ -19,10 +21,13 @@ COMMENDATIONS_TEXT = [
     'Ты сегодня прыгнул выше головы!',
 ]
 
+
 def fix_marks(schoolkid_name):
     """remove bad marks of schoolkid"""
     try:
-        schoolkid = Schoolkid.objects.filter(full_name__contains=schoolkid_name).get()
+        schoolkid = Schoolkid.objects.filter(
+            full_name__contains=schoolkid_name,
+        ).get()
     except MultipleObjectsReturned:
         return f'Учеников с именем {schoolkid_name} много'
     except ObjectDoesNotExist:
@@ -35,10 +40,13 @@ def fix_marks(schoolkid_name):
         points=F("points") + 2
     )
 
+
 def remove_chastisements(schoolkid_name):
     """remove remove_chastisements of schoolkid"""
     try:
-        schoolkid = Schoolkid.objects.filter(full_name__contains=schoolkid_name).get()
+        schoolkid = Schoolkid.objects.filter(
+            full_name__contains=schoolkid_name,
+        ).get()
     except MultipleObjectsReturned:
         return f'Учеников с именем {schoolkid_name} много'
     except ObjectDoesNotExist:
@@ -52,7 +60,9 @@ def remove_chastisements(schoolkid_name):
 def create_commendation(schoolkid_name, subject_name):
     """create commendations to schoolkid by subject"""
     try:
-        schoolkid = Schoolkid.objects.filter(full_name__contains=schoolkid_name).get()
+        schoolkid = Schoolkid.objects.filter(
+            full_name__contains=schoolkid_name,
+        ).get()
     except MultipleObjectsReturned:
         return f'Учеников с именем {schoolkid_name} много'
     except ObjectDoesNotExist:
@@ -73,7 +83,3 @@ def create_commendation(schoolkid_name, subject_name):
         subject=lesson_for_commendation.subject,
         teacher=lesson_for_commendation.teacher,
     )
-
-
-
-
