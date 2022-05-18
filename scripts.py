@@ -22,16 +22,21 @@ COMMENDATIONS_TEXT = [
 ]
 
 
-def fix_marks(schoolkid_name):
-    """remove bad marks of schoolkid"""
+def get_schoolkid(schoolkid_name):
     try:
-        schoolkid = Schoolkid.objects.filter(
+        schoolkid = Schoolkid.objects.get(
             full_name__contains=schoolkid_name,
-        ).get()
+        )
     except MultipleObjectsReturned:
         return f'Учеников с именем {schoolkid_name} много'
     except ObjectDoesNotExist:
         return f'Ученик с именем {schoolkid_name} не найден'
+    return schoolkid
+
+
+def fix_marks(schoolkid_name):
+    """remove bad marks of schoolkid"""
+    schoolkid = get_schoolkid(schoolkid_name=schoolkid_name)
     schoolkid_bad_marks = Mark.objects.filter(
         schoolkid=schoolkid,
         points__in=[2, 3],
@@ -43,14 +48,7 @@ def fix_marks(schoolkid_name):
 
 def remove_chastisements(schoolkid_name):
     """remove remove_chastisements of schoolkid"""
-    try:
-        schoolkid = Schoolkid.objects.filter(
-            full_name__contains=schoolkid_name,
-        ).get()
-    except MultipleObjectsReturned:
-        return f'Учеников с именем {schoolkid_name} много'
-    except ObjectDoesNotExist:
-        return f'Ученик с именем {schoolkid_name} не найден'
+    schoolkid = get_schoolkid(schoolkid_name=schoolkid_name)
     schoolkid_chastisements = Chastisement.objects.filter(
         schoolkid=schoolkid
     )
@@ -59,14 +57,7 @@ def remove_chastisements(schoolkid_name):
 
 def create_commendation(schoolkid_name, subject_name):
     """create commendations to schoolkid by subject"""
-    try:
-        schoolkid = Schoolkid.objects.filter(
-            full_name__contains=schoolkid_name,
-        ).get()
-    except MultipleObjectsReturned:
-        return f'Учеников с именем {schoolkid_name} много'
-    except ObjectDoesNotExist:
-        return f'Ученик с именем {schoolkid_name} не найден'
+    schoolkid = get_schoolkid(schoolkid_name=schoolkid_name)
     subject_lessons = Lesson.objects.filter(
         subject__title=subject_name,
         year_of_study=schoolkid.year_of_study,
