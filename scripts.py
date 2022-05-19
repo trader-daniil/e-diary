@@ -37,6 +37,8 @@ def get_schoolkid(schoolkid_name):
 def fix_marks(schoolkid_name):
     """remove bad marks of schoolkid"""
     schoolkid = get_schoolkid(schoolkid_name=schoolkid_name)
+    if isinstance(schoolkid, str):
+        return schoolkid
     schoolkid_bad_marks = Mark.objects.filter(
         schoolkid=schoolkid,
         points__in=[2, 3],
@@ -49,6 +51,8 @@ def fix_marks(schoolkid_name):
 def remove_chastisements(schoolkid_name):
     """remove remove_chastisements of schoolkid"""
     schoolkid = get_schoolkid(schoolkid_name=schoolkid_name)
+    if isinstance(schoolkid, str):
+        return schoolkid
     schoolkid_chastisements = Chastisement.objects.filter(
         schoolkid=schoolkid
     )
@@ -58,6 +62,8 @@ def remove_chastisements(schoolkid_name):
 def create_commendation(schoolkid_name, subject_name):
     """create commendations to schoolkid by subject"""
     schoolkid = get_schoolkid(schoolkid_name=schoolkid_name)
+    if isinstance(schoolkid, str):
+        return schoolkid
     subject_lessons = Lesson.objects.filter(
         subject__title=subject_name,
         year_of_study=schoolkid.year_of_study,
