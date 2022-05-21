@@ -1,3 +1,4 @@
+import logging
 import random
 
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
@@ -22,23 +23,31 @@ COMMENDATIONS_TEXT = [
 ]
 
 
+logging.basicConfig(
+    format="%(pathname)s %(lineno)d %(message)s",
+    filename='logs_for_script.log',
+    encoding='utf-8',
+)
+
+
 def get_schoolkid(schoolkid_name):
     try:
         schoolkid = Schoolkid.objects.get(
             full_name__contains=schoolkid_name,
         )
     except MultipleObjectsReturned:
-        return f'Учеников с именем {schoolkid_name} много'
+        logging.error(f'Учеников с именем {schoolkid_name} много')
     except ObjectDoesNotExist:
-        return f'Ученик с именем {schoolkid_name} не найден'
-    return schoolkid
+        logging.error(f'Ученик с именем {schoolkid_name} не найден')
+    else:
+        return schoolkid
 
 
 def fix_marks(schoolkid_name):
     """remove bad marks of schoolkid"""
     schoolkid = get_schoolkid(schoolkid_name=schoolkid_name)
-    if isinstance(schoolkid, str):
-        return schoolkid
+    if not schoolkid:
+        return None
     schoolkid_bad_marks = Mark.objects.filter(
         schoolkid=schoolkid,
         points__in=[2, 3],
@@ -51,8 +60,8 @@ def fix_marks(schoolkid_name):
 def remove_chastisements(schoolkid_name):
     """remove remove_chastisements of schoolkid"""
     schoolkid = get_schoolkid(schoolkid_name=schoolkid_name)
-    if isinstance(schoolkid, str):
-        return schoolkid
+    if not schoolkid:
+        return None
     schoolkid_chastisements = Chastisement.objects.filter(
         schoolkid=schoolkid
     )
@@ -62,15 +71,17 @@ def remove_chastisements(schoolkid_name):
 def create_commendation(schoolkid_name, subject_name):
     """create commendations to schoolkid by subject"""
     schoolkid = get_schoolkid(schoolkid_name=schoolkid_name)
-    if isinstance(schoolkid, str):
-        return schoolkid
+    if not schoolkid:
+        return None
     subject_lessons = Lesson.objects.filter(
         subject__title=subject_name,
         year_of_study=schoolkid.year_of_study,
         group_letter=schoolkid.group_letter,
     )
+
     if not subject_lessons:
-        return f'Предмета с названием {subject_name} не найдено'
+        logging.error(f'Предмета с названием {subject_name} не найдено')
+        return None
     lesson_for_commendation = random.choice(subject_lessons)
     commendation_title = random.choice(COMMENDATIONS_TEXT)
     Commendation.objects.create(
